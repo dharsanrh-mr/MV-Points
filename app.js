@@ -45,7 +45,7 @@ function renderDashboard(){
 }
 function gameCard(g){
  const sorted=[...(g.results||[])].sort((a,b)=>a.rank-b.rank), win=sorted[0];
- return `<div class="list-item" data-game="${g.id}"><div class="list-main"><div class="avatar">${g.type==="Rummy"?"♠":"7"}</div><div><b>${g.type}</b><div class="muted">${formatDate(g.date)} • ${g.results.length} players</div><div class="details">Winner: ${esc(win?.name||"—")}</div></div></div><span class="score">${win?.score??0}</span></div>`;
+ return `<div class="list-item" data-game="${g.id}"><div class="list-main"><div class="avatar">${g.type==="Rummy"?"♠":"7"}</div><div><b>${esc(g.type||"Game")}</b><div class="muted">${formatDate(g.date)} • ${(g.results||[]).length} players</div><div class="details">Winner: ${esc(win?.name||"—")}</div></div></div><span class="score">${win?.score??0}</span></div>`;
 }
 $$(".list").forEach(x=>x.addEventListener("click",e=>{const el=e.target.closest("[data-game]");if(el)showGame(el.dataset.game)}));
 
@@ -192,13 +192,14 @@ function closeModal(){$("#modal").classList.add("hidden")}
 $("#modalClose").onclick=closeModal;$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
 
 function renderHistory(){
- const sel=$("#historyMember"); const old=sel.value; sel.innerHTML=`<option value="all">All members</option>`+state.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join(""); if(state.members.some(m=>m.id===old))sel.value=old;
+ const sel=$("#historyMember"); const old=sel.value||"all";
+ sel.innerHTML=`<option value="all">All members</option>`+state.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("");
+ sel.value=state.members.some(m=>m.id===old)?old:"all";
  const date=$("#historyDate").value,type=$("#historyType").value,member=sel.value;
- let gs=[...state.games].sort((a,b)=>b.date.localeCompare(a.date));
- gs=gs.filter(g=>(!date||dateOnly(g.date)===date)&&(type==="all"||g.type===type)&&(!member||(g.results||[]).some(r=>r.memberId===member)));
- $("#historyList").innerHTML=gs.length?gs.map(gameCard).join(""):`<div class="empty">No matching games.</div>`;
+ let gs=Array.isArray(state.games)?[...state.games]:[];
+ gs=gs.filter(g=>{const results=Array.isArray(g.results)?g.results:[];const gameDate=g.date?dateOnly(g.date):"";return (!date||gameDate===date)&&(type==="all"||g.type===type)&&(member==="all"||results.some(r=>r.memberId===member));}).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+ $("#historyList").innerHTML=gs.length?gs.map(gameCard).join(""):`<div class="empty">${date?"No games on the selected date.":"No game history yet. Complete and save a game to see it here."}</div>`;
 }
-$("#historyDate").onchange=renderHistory;$("#historyType").onchange=renderHistory;$("#historyMember").onchange=renderHistory;
 
 function renderSettings(){$("#themeToggle").textContent=state.settings.theme==="dark"?"Dark":"Light";document.documentElement.dataset.theme=state.settings.theme; if($("#scoreMode"))$("#scoreMode").value=state.settings.scoreMode==="low"?"low":"high"}
 $("#themeToggle").onclick=()=>{state.settings.theme=state.settings.theme==="dark"?"light":"dark";save();renderSettings()};
@@ -208,4 +209,4 @@ $("#importInput").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=ne
 $("#clearBtn").onclick=()=>{if(confirm("Clear ALL members and game history? This cannot be undone.")){state={members:[],games:[],settings:{theme:"dark"}};save();location.reload()}};
 $("#menuFab").onclick=()=>{const pages=["dashboard","games","members","history","settings"],cur=$(".page.active")?.id, next=pages[(pages.indexOf(cur)+1)%pages.length];page(next)};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-document.addEventListener("DOMContentLoaded",()=>{renderDashboard();renderSettings()});
+document.addEventListener("DOMContentLoaded",()=>{if($("#historyDate"))$("#historyDate").value="";renderDashboard();renderSettings();renderHistory()});
