@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <title>MV Points</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <span class="eyebrow">GAME SCORE MANAGER</span>
+        <h1>MV Points</h1>
+      </div>
+      <button class="icon-btn" data-page="settings" aria-label="Settings">⚙</button>
+    </header>
+
+    <main id="app">
+      <section class="page active" id="dashboard">
+        <div class="hero-card">
+          <div>
+            <span class="eyebrow">TODAY</span>
+            <h2>Track every game.</h2>
+            <p>Rummy and 7s Point scores, winners, losers and history in one place.</p>
+          </div>
+          <div class="hero-chip">♠</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><span>🎮 Games</span><strong id="statGames">0</strong></div>
+          <div class="stat-card"><span>👥 Members</span><strong id="statMembers">0</strong></div>
+          <div class="stat-card"><span>🏆 Wins</span><strong id="statWins">0</strong></div>
+          <div class="stat-card"><span>📅 Today</span><strong id="statToday">0</strong></div>
+        </div>
+
+        <div class="section-head"><h3>Top Winners</h3><button class="text-btn" data-page="history">View history</button></div>
+        <div id="winnerList" class="list"></div>
+
+        <div class="section-head"><h3>Recent Games</h3><button class="text-btn" data-page="games">New game</button></div>
+        <div id="recentGames" class="list"></div>
+      </section>
+
+      <section class="page" id="games">
+        <div class="page-title"><div><span class="eyebrow">SCORE ENTRY</span><h2>Games</h2></div></div>
+        <div class="game-tabs">
+          <button class="tab active" data-game-type="Rummy">♠ Rummy</button>
+          <button class="tab" data-game-type="7s Point">7s Point</button>
+        </div>
+        <div class="panel">
+          <label>Players</label>
+          <div id="playerPicker" class="player-picker"></div>
+          <button id="addPlayerFromGame" class="secondary-btn">＋ Add member</button>
+          <div id="scoreInputs" class="score-inputs"></div>
+          <button id="saveGame" class="primary-btn">Save Game Score</button>
+        </div>
+      </section>
+
+      <section class="page" id="members">
+        <div class="page-title"><div><span class="eyebrow">PLAYERS</span><h2>Members</h2></div><button id="addMemberBtn" class="primary-small">＋ Add</button></div>
+        <div id="memberList" class="member-grid"></div>
+      </section>
+
+      <section class="page" id="history">
+        <div class="page-title"><div><span class="eyebrow">ALL RECORDS</span><h2>History</h2></div></div>
+        <div class="filters">
+          <input id="historyDate" type="date">
+          <select id="historyType"><option value="all">All games</option><option>Rummy</option><option>7s Point</option></select>
+          <select id="historyMember"><option value="all">All members</option></select>
+        </div>
+        <div id="historyList" class="list"></div>
+      </section>
+
+      <section class="page" id="settings">
+        <div class="page-title"><div><span class="eyebrow">PREFERENCES</span><h2>Settings</h2></div></div>
+        <div class="panel settings-panel">
+          <div class="setting-row"><div><strong>Theme</strong><small>Switch between dark and light</small></div><button id="themeToggle" class="toggle-btn">Dark</button></div>
+          <div class="setting-row"><div><strong>Backup data</strong><small>Download your local records</small></div><button id="exportBtn" class="secondary-btn">Export JSON</button></div>
+          <div class="setting-row"><div><strong>Restore data</strong><small>Import a previous JSON backup</small></div><label class="secondary-btn file-btn">Import JSON<input id="importInput" type="file" accept=".json"></label></div>
+          <div class="setting-row danger-row"><div><strong>Clear all data</strong><small>This cannot be undone.</small></div><button id="clearBtn" class="danger-btn">Clear</button></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="dashboard">⌂<span>Home</span></button>
+      <button class="nav-item" data-page="games">♠<span>Games</span></button>
+      <button class="menu-fab" id="menuFab">＋</button>
+      <button class="nav-item" data-page="members">♙<span>Members</span></button>
+      <button class="nav-item" data-page="history">▤<span>History</span></button>
+    </nav>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="modalClose" class="modal-close">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
