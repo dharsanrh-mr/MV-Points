@@ -20,3 +20,6 @@ Open `index.html` in any modern browser. No server or build step is required.
 
 ## GitHub Pages
 Upload these files to a repository and enable Pages from the repository's Settings > Pages.
+
+## UI
+Premium MV Points black/red/gold casino-style interface with responsive sizing and mobile-first layout.
