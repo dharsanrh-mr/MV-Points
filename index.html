@@ -7,15 +7,19 @@
   <meta name="application-name" content="MV Points">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>MV Points</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div>
-        <span class="eyebrow">GAME SCORE MANAGER</span>
-        <h1>MV Points</h1>
+      <div class="brand">
+        <img src="logo.svg" class="brand-logo" alt="MV Points">
+        <div class="brand-copy">
+          <span class="eyebrow">GAME SCORE MANAGER</span>
+          <h1>MV Points</h1>
+        </div>
       </div>
       <button class="icon-btn" data-page="settings" aria-label="Settings">⚙</button>
     </header>
@@ -28,11 +32,10 @@
             <h2>Track every game.</h2>
             <p>Rummy and 7s Point scores, winners, losers and history in one place.</p>
           </div>
-          <div class="hero-chip">♠</div>
+          <div class="hero-logo"><img src="logo.svg" alt="MV Points"></div>
         </div>
 
         <div id="currentResult" class="current-result"></div>
-        <div id="lastPointCard" class="last-point-card"></div>
 
         <div class="stats-grid">
           <div class="stat-card"><span>🎮 Games</span><strong id="statGames">0</strong></div>
@@ -58,7 +61,6 @@
           <label>Players</label>
           <div id="playerPicker" class="player-picker"></div>
           <button id="addPlayerFromGame" class="secondary-btn">＋ Add member</button>
-          <div id="sevenRoundPanel" class="seven-round-panel" hidden></div>
           <div id="scoreInputs" class="score-inputs"></div>
           <button id="saveGame" class="primary-btn">Save Game Score</button>
         </div>
