@@ -23,3 +23,6 @@ Upload these files to a repository and enable Pages from the repository's Settin
 
 ## UI
 Premium MV Points black/red/gold casino-style interface with responsive sizing and mobile-first layout.
+
+## 7s Point
+7s Point now uses exactly 7 rounds. Round 1 and Round 7 double entered points; rounds 2–6 keep the entered value. Final winner/losers are shown after round 7, and the last-point player is surfaced on Home.

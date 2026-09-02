@@ -1,6 +1,6 @@
 const KEY="rummyScoreAppV1";
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||{members:[],games:[],settings:{theme:"dark",scoreMode:"high"}};
-state.settings=state.settings||{theme:"dark"}; state.settings.scoreMode=state.settings.scoreMode||"high";
+state.settings=state.settings||{theme:"dark"}; state.settings.scoreMode=state.settings.scoreMode||"high"; state.sevenDraft=state.sevenDraft||{round:1,players:[],scores:{},lastPointPlayerId:null};
 let currentType="Rummy";
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -29,6 +29,15 @@ function renderDashboard(){
    $("#currentResult").innerHTML=`<div class="current-empty"><span class="eyebrow">CURRENT RESULT</span><h3>🏆 No game yet</h3><p>Save a game to show the current winner and losers here.</p></div>`;
  }
 
+ const latest7=[...state.games].filter(g=>g.type==="7s Point").sort((a,b)=>b.date.localeCompare(a.date))[0];
+ if(latest7){
+   const lastId=latest7.lastPointPlayerId||latest7.results?.[0]?.memberId;
+   const lp=state.members.find(m=>m.id===lastId)||latest7.results?.find(r=>r.memberId===lastId);
+   $("#lastPointCard").innerHTML=`<div class="last-point-visual"><div class="last-point-avatar">🎴</div><div><span class="eyebrow">LAST POINT PLAYER</span><h3>${esc(lp?.name||"—")}</h3><p>7s Point • Round 7 completed • Ready for next game</p></div><div class="next-player-icon">➜</div></div>`;
+ }else{
+   $("#lastPointCard").innerHTML=`<div class="last-point-visual"><div class="last-point-avatar">🎴</div><div><span class="eyebrow">LAST POINT PLAYER</span><h3>—</h3><p>Complete a 7s Point game to show the last point player.</p></div></div>`;
+ }
+
  const stats=state.members.map(m=>{let rs=state.games.flatMap(g=>g.results||[]).filter(r=>r.memberId===m.id);return {...m,wins:rs.filter(r=>r.rank===1).length,plays:rs.length,total:rs.reduce((a,r)=>a+Number(r.score||0),0)}}).sort((a,b)=>b.wins-a.wins||b.total-a.total).slice(0,5);
  $("#winnerList").innerHTML=stats.length?stats.map((m,i)=>`<div class="list-item"><div class="list-main"><div class="avatar">${initials(m.name)}</div><div><b>${esc(m.name)}</b><div class="muted">${m.plays} games • ${m.wins} wins</div></div></div><span class="winner score">${i===0?"🏆 ":""}${m.wins}</span></div>`).join(""):`<div class="empty">Add members and record your first game.</div>`;
  const recent=[...state.games].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
@@ -43,16 +52,68 @@ $$(".list").forEach(x=>x.addEventListener("click",e=>{const el=e.target.closest(
 function renderGames(){
  $("#playerPicker").innerHTML=state.members.length?state.members.map(m=>`<label class="player-check"><input type="checkbox" value="${m.id}"> ${esc(m.name)}</label>`).join(""):`<div class="empty">No members yet. Add one first.</div>`;
  $("#scoreInputs").innerHTML="";
+ if(currentType==="7s Point"){renderSevenPanel();}else{renderRummyPanel();}
 }
-$$("[data-game-type]").forEach(b=>b.addEventListener("click",()=>{$$("[data-game-type]").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentType=b.dataset.gameType;updateScoreInputs()}));
-$("#playerPicker").addEventListener("change",updateScoreInputs);
+function renderRummyPanel(){
+ $("#sevenRoundPanel").hidden=true;
+ $("#scoreInputs").hidden=false;
+ $("#saveGame").textContent="Save Game Score";
+}
+function renderSevenPanel(){
+ $("#sevenRoundPanel").hidden=false;
+ $("#scoreInputs").hidden=true;
+ const d=state.sevenDraft, round=Math.min(7,Math.max(1,Number(d.round)||1));
+ const ids=$$("#playerPicker input:checked").map(x=>x.value);
+ const selected=ids.length?ids:d.players;
+ const selectedMembers=selected.map(mid=>state.members.find(m=>m.id===mid)).filter(Boolean);
+ d.players=selected;
+ const doubled=round===1||round===7;
+ $("#sevenRoundPanel").innerHTML=`<div class="seven-head"><div><span class="eyebrow">7 ROUNDS</span><h3>Round ${round} / 7</h3></div><span class="round-badge">${doubled?"×2 POINT ROUND":"NORMAL ROUND"}</span></div>
+ <div class="round-rule">${doubled?"2 points → 4 points":"2 points → 2 points"} <span>• Enter this round's points</span></div>
+ <div class="seven-score-list">${selectedMembers.length?selectedMembers.map(m=>{const total=Number(d.scores[m.id]||0);return `<div class="seven-score-row"><div><div class="seven-player">${esc(m.name)}</div><small>Total: ${total}</small></div><input class="seven-input" data-id="${m.id}" type="number" min="0" step="1" placeholder="Points"></div>`}).join(""):`<div class="empty">Select players above.</div>`}</div>
+ <button id="saveSevenRound" class="primary-btn">${round===7?"Finish 7 Rounds":"Save Round "+round}</button>
+ ${round>1?`<button id="resetSevenRound" class="secondary-btn seven-reset">Reset 7s draft</button>`:""}`;
+ $("#saveSevenRound")?.addEventListener("click",saveSevenRound);
+ $("#resetSevenRound")?.addEventListener("click",resetSevenDraft);
+}
 function updateScoreInputs(){
+ if(currentType==="7s Point"){renderSevenPanel();return;}
  const ids=$$("#playerPicker input:checked").map(x=>x.value);
  $("#scoreInputs").innerHTML=ids.map(mid=>{const m=state.members.find(x=>x.id===mid);return `<div class="score-row"><b>${esc(m.name)}</b><input class="player-score" data-id="${mid}" type="number" step="1" placeholder="Score"></div>`}).join("");
 }
+$$("[data-game-type]").forEach(b=>b.addEventListener("click",()=>{$$("[data-game-type]").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentType=b.dataset.gameType;updateScoreInputs();if(currentType==="7s Point")renderSevenPanel();}));
+$("#playerPicker").addEventListener("change",()=>{if(currentType==="7s Point"){state.sevenDraft.players=$$("#playerPicker input:checked").map(x=>x.value);save();renderSevenPanel()}else updateScoreInputs()});
 $("#addPlayerFromGame").onclick=()=>openMemberModal();
 
+function saveSevenRound(){
+ const inputs=$$(".seven-input"), d=state.sevenDraft, round=Number(d.round)||1;
+ const ids=$$("#playerPicker input:checked").map(x=>x.value);
+ if(ids.length<2)return toast("Select at least 2 players");
+ if(inputs.length!==ids.length||inputs.some(i=>i.value===""))return toast("Enter every player's points");
+ d.players=ids;
+ const doubled=round===1||round===7;
+ inputs.forEach(i=>{const raw=Number(i.value)||0;d.scores[i.dataset.id]=Number(d.scores[i.dataset.id]||0)+(doubled?raw*2:raw);});
+ const roundValues=inputs.map(i=>({memberId:i.dataset.id,points:Number(i.value)||0,effective:(doubled?(Number(i.value)||0)*2:(Number(i.value)||0))}));
+ const mode=state.settings.scoreMode==="low"?"low":"high";
+ const roundSorted=[...roundValues].sort((a,b)=>mode==="low"?a.effective-b.effective:b.effective-a.effective);
+ d.lastPointPlayerId=roundSorted[0]?.memberId||null;
+ if(round===7){
+   const results=ids.map(mid=>{const m=state.members.find(x=>x.id===mid);return {memberId:m.id,name:m.name,score:Number(d.scores[m.id]||0)}}).sort((a,b)=>mode==="low"?a.score-b.score:b.score-a.score);
+   results.forEach((r,i)=>r.rank=i+1);
+   state.games.push({id:id(),type:"7s Point",date:new Date().toISOString(),results,rounds:7,lastPointPlayerId:d.lastPointPlayerId});
+   state.sevenDraft={round:1,players:[],scores:{},lastPointPlayerId:null};
+   save(); toast("7s Point – 7 rounds completed"); page("dashboard");
+ }else{
+   d.round=round+1; save(); renderSevenPanel(); toast(`Round ${round} saved`);
+ }
+}
+function resetSevenDraft(){
+ state.sevenDraft={round:1,players:[],scores:{},lastPointPlayerId:null};save();
+ $$("#playerPicker input").forEach(x=>x.checked=false);renderSevenPanel();toast("7s draft reset");
+}
+
 $("#saveGame").onclick=()=>{
+ if(currentType==="7s Point"){saveSevenRound();return;}
  const inputs=$$(".player-score"), ids=inputs.map(i=>i.dataset.id);
  if(ids.length<2)return toast("Select at least 2 players");
  if(inputs.some(i=>i.value===""))return toast("Enter every player's score");
@@ -84,13 +145,14 @@ function openEditMemberModal(memberId){
    if(!name)return toast("Enter a name");
    if(state.members.some(x=>x.id!==memberId && x.name.toLowerCase()===name.toLowerCase()))return toast("Member already exists");
    m.name=name;
+   if(state.sevenDraft?.players?.includes(memberId)) state.sevenDraft.players=[...state.sevenDraft.players];
    state.games.forEach(g=>(g.results||[]).forEach(r=>{if(r.memberId===memberId)r.name=name;}));
    save(); closeModal(); renderMembers(); renderDashboard(); renderHistory(); toast("Member updated");
  };
 }
 function showGame(gid){
  const g=state.games.find(x=>x.id===gid);if(!g)return; const sorted=[...g.results].sort((a,b)=>a.rank-b.rank);
- $("#modalContent").innerHTML=`<div class="game-modal-head"><div><span class="eyebrow">GAME RESULT</span><h2>${g.type}</h2><p class="muted">${formatDate(g.date)}</p></div><span class="game-badge">MV</span></div><div class="breakdown">${sorted.map(r=>`<div><span>${r.rank===1?"🏆":"🃏"} ${esc(r.name)}</span><b class="${r.rank===1?"winner":"loser"}">${r.score}</b></div>`).join("")}</div><div class="share-actions"><button class="share-btn" id="shareGame">↗ Share</button><button class="pdf-btn" id="pdfGame">▣ Share PDF</button></div><button class="danger-btn" style="width:100%;margin-top:12px" id="deleteGame">Delete game</button>`;
+ $("#modalContent").innerHTML=`<div class="game-modal-head"><div><span class="eyebrow">GAME RESULT</span><h2>${g.type}</h2><p class="muted">${formatDate(g.date)}${g.type==="7s Point"?" • 7/7 rounds":""}</p></div><span class="game-badge">MV</span></div>${g.type==="7s Point"&&g.lastPointPlayerId?`<div class="last-point-mini">🎴 Last point: <b>${esc((g.results||[]).find(r=>r.memberId===g.lastPointPlayerId)?.name||"—")}</b></div>`:""}<div class="breakdown">${sorted.map(r=>`<div><span>${r.rank===1?"🏆":"🃏"} ${esc(r.name)}</span><b class="${r.rank===1?"winner":"loser"}">${r.score}</b></div>`).join("")}</div><div class="share-actions"><button class="share-btn" id="shareGame">↗ Share</button><button class="pdf-btn" id="pdfGame">▣ Share PDF</button></div><button class="danger-btn" style="width:100%;margin-top:12px" id="deleteGame">Delete game</button>`;
  $("#modal").classList.remove("hidden");
  $("#shareGame").onclick=()=>shareGame(g);
  $("#pdfGame").onclick=()=>shareGamePdf(g);
