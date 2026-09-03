@@ -33,3 +33,13 @@ Premium MV Points black/red/gold casino-style interface with responsive sizing a
 - Added a dedicated Losers section on the dashboard.
 - Added local dashboard artwork (`dashboard-art.svg`).
 - Made Clear All reset the 7s Point draft safely.
+- Fixed Games page losing your 7s Point player selection when you navigate away mid-draft.
+
+## New features
+- Undo for member/game deletion (a few seconds via the toast, before it's gone for good).
+- Confirmation prompt before importing a JSON backup, since it replaces all current data.
+- Member search box on the Members page.
+- Sort control on History: newest, oldest, highest score, lowest score.
+- Win-streak badge (🔥) next to a member's name on the dashboard leaderboard.
+- Round-by-round score breakdown table in the 7s Point game detail view.
+- "Back" button in 7s Point to reopen the previous round for correction before finishing.

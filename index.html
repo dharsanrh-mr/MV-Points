@@ -69,6 +69,7 @@
 
       <section class="page" id="members">
         <div class="page-title"><div><span class="eyebrow">PLAYERS</span><h2>Members</h2></div><button id="addMemberBtn" class="primary-small">＋ Add</button></div>
+        <input id="memberSearch" type="search" placeholder="🔍 Search members..." class="member-search">
         <div id="memberList" class="member-grid"></div>
       </section>
 
@@ -78,6 +79,7 @@
           <input id="historyDate" type="date">
           <select id="historyType"><option value="all">All games</option><option>Rummy</option><option>7s Point</option></select>
           <select id="historyMember"><option value="all">All members</option></select>
+          <select id="historySort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="highest">Highest score</option><option value="lowest">Lowest score</option></select>
         </div>
         <div id="historyList" class="list"></div>
       </section>
