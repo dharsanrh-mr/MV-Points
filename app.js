@@ -106,8 +106,8 @@ function saveSevenRound(){
  if(inputs.length!==ids.length||inputs.some(i=>i.value===""))return toast("Enter every player's points");
  d.players=ids;
  const doubled=round===1||round===7;
- inputs.forEach(i=>{const raw=Number(i.value)||0;d.scores[i.dataset.id]=Number(d.scores[i.dataset.id]||0)+(doubled?raw*2:raw);});
- const roundValues=inputs.map(i=>({memberId:i.dataset.id,points:Number(i.value)||0,effective:(doubled?(Number(i.value)||0)*2:(Number(i.value)||0))}));
+ inputs.forEach(i=>{const raw=Number(i.value)||0;d.scores[i.dataset.id]=Number(d.scores[i.dataset.id]||0)+(doubled && raw===2 ? 4 : raw);});
+ const roundValues=inputs.map(i=>({memberId:i.dataset.id,points:Number(i.value)||0,effective:(doubled && (Number(i.value)||0)===2 ? 4 : (Number(i.value)||0))}));
  const mode=state.settings.scoreMode==="low"?"low":"high";
  const roundSorted=[...roundValues].sort((a,b)=>mode==="low"?a.effective-b.effective:b.effective-a.effective);
  d.lastPointPlayerId=roundSorted[0]?.memberId||null;
