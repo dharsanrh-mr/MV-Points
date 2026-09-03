@@ -59,11 +59,14 @@ function renderGames(){
 function renderRummyPanel(){
  $("#sevenRoundPanel").hidden=true;
  $("#scoreInputs").hidden=false;
+ $("#lastPointPicker").hidden=false;
+ renderLastPointPicker();
  $("#saveGame").textContent="Save Game Score";
 }
 function renderSevenPanel(){
  $("#sevenRoundPanel").hidden=false;
  $("#scoreInputs").hidden=true;
+ $("#lastPointPicker").hidden=true;
  const d=state.sevenDraft, round=Math.min(7,Math.max(1,Number(d.round)||1));
  if(d.round>7){d.round=7;}
  const ids=$$("#playerPicker input:checked").map(x=>x.value);
@@ -83,6 +86,14 @@ function updateScoreInputs(){
  if(currentType==="7s Point"){renderSevenPanel();return;}
  const ids=$$("#playerPicker input:checked").map(x=>x.value);
  $("#scoreInputs").innerHTML=ids.map(mid=>{const m=state.members.find(x=>x.id===mid);return `<div class="score-row"><b>${esc(m.name)}</b><input class="player-score" data-id="${mid}" type="number" step="1" placeholder="Score"></div>`}).join("");
+ renderLastPointPicker();
+}
+function renderLastPointPicker(){
+ const box=$("#lastPointPicker"); if(!box)return;
+ const ids=$$("#playerPicker input:checked").map(x=>x.value);
+ if(currentType!=="Rummy"){box.hidden=true;box.innerHTML="";return;}
+ box.hidden=false;
+ box.innerHTML=`<div class="last-point-entry-card"><div><span class="eyebrow">LAST POINT MEMBER</span><strong>Who got the last point?</strong><small>This is shown separately from the winner.</small></div><select id="lastPointMember" class="last-point-select"><option value="">Select member</option>${ids.map(mid=>{const m=state.members.find(x=>x.id===mid);return `<option value="${mid}">${esc(m?.name||"")}</option>`}).join("")}</select></div>`;
 }
 $$("[data-game-type]").forEach(b=>b.addEventListener("click",()=>{$$("[data-game-type]").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentType=b.dataset.gameType;updateScoreInputs();if(currentType==="7s Point")renderSevenPanel();}));
 $("#playerPicker").addEventListener("change",()=>{if(currentType==="7s Point"){state.sevenDraft.players=$$("#playerPicker input:checked").map(x=>x.value);save();renderSevenPanel()}else updateScoreInputs()});
@@ -107,7 +118,7 @@ function saveSevenRound(){
    state.sevenDraft={round:1,players:[],scores:{},lastPointPlayerId:null};
    save(); toast("7s Point – 7 rounds completed"); page("dashboard");
  }else{
-   d.round=Math.min(7,round+1); save(); renderSevenPanel(); toast(`Round ${round} saved`);
+   d.round=round+1; save(); renderSevenPanel(); toast(`Round ${round} saved`);
  }
 }
 function resetSevenDraft(){
@@ -122,7 +133,8 @@ $("#saveGame").onclick=()=>{
  if(inputs.some(i=>i.value===""))return toast("Enter every player's score");
  const results=inputs.map(i=>{const m=state.members.find(x=>x.id===i.dataset.id);return {memberId:m.id,name:m.name,score:Number(i.value)}}).sort((a,b)=>state.settings.scoreMode==="low"?a.score-b.score:b.score-a.score);
  results.forEach((r,i)=>r.rank=i+1);
- state.games.push({id:id(),type:currentType,date:new Date().toISOString(),results});
+ const lastPointPlayerId=$("#lastPointMember")?.value||null;
+ state.games.push({id:id(),type:currentType,date:new Date().toISOString(),results,lastPointPlayerId});
  save(); toast("Game saved successfully"); page("dashboard");
 };
 
@@ -155,7 +167,7 @@ function openEditMemberModal(memberId){
 }
 function showGame(gid){
  const g=state.games.find(x=>x.id===gid);if(!g)return; const sorted=[...g.results].sort((a,b)=>a.rank-b.rank); const winner=sorted[0], losers=sorted.slice(1);
- $("#modalContent").innerHTML=`<div class="game-modal-head"><div><span class="eyebrow">GAME RESULT</span><h2>${g.type}</h2><p class="muted">${formatDate(g.date)}${g.type==="7s Point"?" • 7/7 rounds":""}</p></div><span class="game-badge">MV</span></div>${g.type==="7s Point"&&g.lastPointPlayerId?`<section class="last-point-result-section"><div class="last-point-result-icon">🎴</div><div class="last-point-result-copy"><span class="eyebrow">LAST POINT MEMBER</span><h3>${esc((g.results||[]).find(r=>r.memberId===g.lastPointPlayerId)?.name||"—")}</h3><p>Last point recorded in Round 7</p></div><span class="last-point-round">ROUND 7</span></section>`:""}<section class="result-section winner-section"><div class="result-section-head"><div><span class="eyebrow">WINNER</span><h3>🏆 ${esc(winner?.name||"—")}</h3></div><strong>${winner?.score??0}</strong></div><div class="winner-glow">CHAMPION</div></section><section class="result-section losers-section"><div class="result-section-head losers-heading"><div><span class="eyebrow">LOSERS</span><h3>🃏 ${losers.length} Player${losers.length===1?"":"s"}</h3></div><span class="loser-label">RANKED</span></div><div class="loser-result-list">${losers.length?losers.map(r=>`<div class="loser-result-row"><div class="loser-rank">#${r.rank}</div><div class="loser-result-name"><b>${esc(r.name)}</b><span>Loser</span></div><strong>${r.score}</strong></div>`).join(""):`<div class="muted">No losers</div>`}</div></section><div class="share-actions"><button class="share-btn" id="shareGame">↗ Share</button><button class="pdf-btn" id="pdfGame">▣ Share PDF</button></div><button class="danger-btn" style="width:100%;margin-top:12px" id="deleteGame">Delete game</button>`;
+ $("#modalContent").innerHTML=`<div class="game-modal-head"><div><span class="eyebrow">GAME RESULT</span><h2>${g.type}</h2><p class="muted">${formatDate(g.date)}${g.type==="7s Point"?" • 7/7 rounds":""}</p></div><span class="game-badge">MV</span></div>${g.lastPointPlayerId?`<section class="last-point-result-section"><div class="last-point-result-icon">🎴</div><div class="last-point-result-copy"><span class="eyebrow">LAST POINT MEMBER</span><h3>${esc((g.results||[]).find(r=>r.memberId===g.lastPointPlayerId)?.name||"—")}</h3><p>${g.type==="7s Point"?"Last point recorded in Round 7":"Last point member recorded for this game"}</p></div><span class="last-point-round">${g.type==="7s Point"?"ROUND 7":"LAST POINT"}</span></section>`:`<section class="last-point-result-section last-point-empty"><div class="last-point-result-icon">🎴</div><div class="last-point-result-copy"><span class="eyebrow">LAST POINT MEMBER</span><h3>Not recorded</h3><p>Select the last point member when saving a new Rummy game.</p></div></section>`}<section class="result-section winner-section"><div class="result-section-head"><div><span class="eyebrow">WINNER</span><h3>🏆 ${esc(winner?.name||"—")}</h3></div><strong>${winner?.score??0}</strong></div><div class="winner-glow">CHAMPION</div></section><section class="result-section losers-section"><div class="result-section-head losers-heading"><div><span class="eyebrow">LOSERS</span><h3>🃏 ${losers.length} Player${losers.length===1?"":"s"}</h3></div><span class="loser-label">RANKED</span></div><div class="loser-result-list">${losers.length?losers.map(r=>`<div class="loser-result-row"><div class="loser-rank">#${r.rank}</div><div class="loser-result-name"><b>${esc(r.name)}</b><span>Loser</span></div><strong>${r.score}</strong></div>`).join(""):`<div class="muted">No losers</div>`}</div></section><div class="share-actions"><button class="share-btn" id="shareGame">↗ Share</button><button class="pdf-btn" id="pdfGame">▣ Share PDF</button></div><button class="danger-btn" style="width:100%;margin-top:12px" id="deleteGame">Delete game</button>`;
  $("#modal").classList.remove("hidden");
  $("#shareGame").onclick=()=>shareGame(g);
  $("#pdfGame").onclick=()=>shareGamePdf(g);
