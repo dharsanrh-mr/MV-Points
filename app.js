@@ -221,7 +221,11 @@ function showGame(gid){
 
 function shareGame(g){
  const sorted=[...g.results].sort((a,b)=>a.rank-b.rank);
- const lines=[`MV Points • ${g.type}`,formatDate(g.date),"",...sorted.map(r=>`${r.rank}. ${r.name} — ${r.score}`)];
+ const lastIdx=sorted.length-1;
+ const lines=[`MV Points • ${g.type}`,formatDate(g.date),"",...sorted.map((r,i)=>{
+   const tag=i===0?" 🏆 WINNER":(i===lastIdx&&lastIdx>0?" 🎴 LAST POINT":"");
+   return `${r.rank}. ${r.name} — ${r.score}${tag}`;
+ })];
  if(navigator.share){navigator.share({title:`MV Points - ${g.type}`,text:lines.join("\n")}).catch(()=>{});}else{navigator.clipboard?.writeText(lines.join("\n"));toast("Score copied to clipboard");}
 }
 
@@ -229,6 +233,7 @@ async function shareGamePdf(g){
  if(!window.jspdf?.jsPDF)return toast("PDF library not loaded");
  const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:"mm",format:"a4"});
  const sorted=[...g.results].sort((a,b)=>a.rank-b.rank);
+ const lastIdx=sorted.length-1;
  doc.setFillColor(6,8,13);doc.rect(0,0,210,297,"F");
  doc.setFillColor(105,18,29);doc.roundedRect(16,16,178,265,8,8,"F");
  doc.setDrawColor(230,183,65);doc.setLineWidth(0.8);doc.roundedRect(16,16,178,265,8,8,"S");
@@ -239,9 +244,25 @@ async function shareGamePdf(g){
  doc.setFillColor(8,11,17);doc.roundedRect(27,89,156,15,4,4,"F");
  doc.setTextColor(244,196,78);doc.setFontSize(9);doc.text("FINAL SCOREBOARD",35,99);
  let y=116; sorted.forEach((r,i)=>{
-   doc.setFillColor(i===0?45:15,i===0?34:17,i===0?10:23);doc.roundedRect(27,y-8,156,18,4,4,"F");
-   doc.setTextColor(245,245,245);doc.setFontSize(12);doc.text(`${i+1}. ${r.name}`,35,y+3);
-   doc.setTextColor(i===0?244:255,i===0?196:120,i===0?78:135);doc.setFontSize(14);doc.text(String(r.score),171,y+3,{align:"right"}); y+=24;
+   const isWinner=i===0, isLastPoint=i===lastIdx&&lastIdx>0;
+   // Row fill: gold for winner, deep red for last point, dark neutral for everyone else
+   if(isWinner)doc.setFillColor(50,38,10);
+   else if(isLastPoint)doc.setFillColor(58,17,24);
+   else doc.setFillColor(15,17,23);
+   doc.roundedRect(27,y-8,156,18,4,4,"F");
+   // Row border to make winner/last-point pop out separately from the rest
+   if(isWinner){doc.setDrawColor(244,196,78);doc.setLineWidth(0.6);doc.roundedRect(27,y-8,156,18,4,4,"S");}
+   else if(isLastPoint){doc.setDrawColor(217,39,53);doc.setLineWidth(0.6);doc.roundedRect(27,y-8,156,18,4,4,"S");}
+   const tag=isWinner?"🏆 ":(isLastPoint?"🎴 ":"");
+   doc.setTextColor(245,245,245);doc.setFontSize(12);doc.text(`${tag}${i+1}. ${r.name}`,35,y+3);
+   if(isWinner)doc.setTextColor(244,196,78);
+   else if(isLastPoint)doc.setTextColor(217,39,53);
+   else doc.setTextColor(255,120,135);
+   doc.setFontSize(14);doc.text(String(r.score),140,y+3,{align:"right"});
+   // Small status label so winner and last point are clearly called out separately when shared
+   if(isWinner){doc.setFontSize(7);doc.setTextColor(244,196,78);doc.text("WINNER",171,y+3,{align:"right"});}
+   else if(isLastPoint){doc.setFontSize(7);doc.setTextColor(217,39,53);doc.text("LAST PT",171,y+3,{align:"right"});}
+   y+=24;
  });
  doc.setTextColor(170,170,180);doc.setFontSize(9);doc.text("PLAY • SCORE • WIN",105,258,{align:"center"});
  const blob=doc.output("blob"); const file=new File([blob],`MV-Points-${g.type.replace(/\s+/g,"-")}-${dateOnly(g.date)}.pdf`,{type:"application/pdf"});
