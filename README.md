@@ -6,7 +6,7 @@ A responsive, localStorage-powered Rummy / 7s Point score manager.
 Open `index.html` in any modern browser. No server or build step is required.
 
 ## Features
-- Dashboard with winners, games, members and today's count
+- Dashboard with winners, a dedicated latest-losers section, dashboard artwork, games, members and today's count
 - Rummy and 7s Point game modes
 - Add/delete members
 - Score entry and automatic ranking
@@ -26,3 +26,10 @@ Premium MV Points black/red/gold casino-style interface with responsive sizing a
 
 ## 7s Point
 7s Point now uses exactly 7 rounds. Round 1 and Round 7 double entered points; rounds 2–6 keep the entered value. Final winner/losers are shown after round 7, and the last-point player is surfaced on Home.
+
+
+## Fixes in this version
+- Fixed dashboard crash caused by a missing `lastPointCard` element.
+- Added a dedicated Losers section on the dashboard.
+- Added local dashboard artwork (`dashboard-art.svg`).
+- Made Clear All reset the 7s Point draft safely.

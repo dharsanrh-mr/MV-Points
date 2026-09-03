@@ -20,15 +20,16 @@ function renderDashboard(){
  const today=new Date().toISOString().slice(0,10); $("#statToday").textContent=state.games.filter(g=>dateOnly(g.date)===today).length;
 
  const latest=[...state.games].sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const loserBox=$("#loserDashboard");
  if(latest){
    const sorted=[...(latest.results||[])].sort((a,b)=>a.rank-b.rank), winner=sorted[0], losers=sorted.slice(1);
-   $("#currentResult").innerHTML=`<div class="current-result-head"><div><span class="eyebrow">CURRENT WINNER</span><h3>🏆 ${esc(winner?.name||"—")}</h3><div class="muted">${latest.type} • ${formatDate(latest.date)} • Score ${winner?.score??0}</div></div><div class="winner-badge">🏆 WINNER</div></div>
-   <div class="loser-title">🃏 LOSERS</div>
-   <div class="loser-list">${losers.length?losers.map(r=>`<div class="loser-chip"><span>🃏 ${esc(r.name)}</span><b>${r.score}</b></div>`).join(""):`<div class="muted">No losers</div>`}</div>`;
+   $("#currentResult").innerHTML=`<div class="current-result-head"><div><span class="eyebrow">CURRENT WINNER</span><h3>🏆 ${esc(winner?.name||"—")}</h3><div class="muted">${latest.type} • ${formatDate(latest.date)} • Score ${winner?.score??0}</div></div><div class="winner-badge">🏆 WINNER</div></div>`;
+   if(loserBox) loserBox.innerHTML=`<div class="loser-dashboard-head"><div><span class="eyebrow">LATEST GAME</span><h3>Losers</h3></div><span class="loser-count">${losers.length}</span></div>
+   <div class="loser-grid">${losers.length?losers.map(r=>`<div class="loser-card"><div class="loser-avatar">✕</div><div class="loser-info"><b>${esc(r.name)}</b><span>${latest.type} • Rank #${r.rank}</span></div><strong>${r.score}</strong></div>`).join(""):`<div class="muted">No losers</div>`}</div>`;
  }else{
    $("#currentResult").innerHTML=`<div class="current-empty"><span class="eyebrow">CURRENT RESULT</span><h3>🏆 No game yet</h3><p>Save a game to show the current winner and losers here.</p></div>`;
+   if(loserBox) loserBox.innerHTML="";
  }
-
  const latest7=[...state.games].filter(g=>g.type==="7s Point").sort((a,b)=>b.date.localeCompare(a.date))[0];
  if(latest7){
    const lastId=latest7.lastPointPlayerId||latest7.results?.[0]?.memberId;
@@ -205,7 +206,7 @@ $("#themeToggle").onclick=()=>{state.settings.theme=state.settings.theme==="dark
 document.addEventListener("change",e=>{if(e.target.id==="scoreMode"){state.settings.scoreMode=e.target.value;save();toast(e.target.value==="low"?"Low score wins":"High score wins");}});
 $("#exportBtn").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`rummy-score-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);toast("Backup exported")};
 $("#importInput").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x.members)||!Array.isArray(x.games))throw Error();state=x;state.settings=state.settings||{theme:"dark"};save();location.reload()}catch{toast("Invalid backup file")}};r.readAsText(f)};
-$("#clearBtn").onclick=()=>{if(confirm("Clear ALL members and game history? This cannot be undone.")){state={members:[],games:[],settings:{theme:"dark"}};save();location.reload()}};
+$("#clearBtn").onclick=()=>{if(confirm("Clear ALL members and game history? This cannot be undone.")){state={members:[],games:[],settings:{theme:"dark",scoreMode:"high"},sevenDraft:{round:1,players:[],scores:{},lastPointPlayerId:null}};save();location.reload()}};
 $("#menuFab").onclick=()=>{const pages=["dashboard","games","members","history","settings"],cur=$(".page.active")?.id, next=pages[(pages.indexOf(cur)+1)%pages.length];page(next)};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 document.addEventListener("DOMContentLoaded",()=>{renderDashboard();renderSettings()});

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 220">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6d56b"/><stop offset=".5" stop-color="#bd7b20"/><stop offset="1" stop-color="#7e1520"/></linearGradient></defs>
+<circle cx="110" cy="110" r="92" fill="#090b11" stroke="#d3a33d" stroke-width="3"/>
+<circle cx="110" cy="110" r="76" fill="none" stroke="#7e1520" stroke-width="2" stroke-dasharray="5 8"/>
+<path d="M110 45c-18 22-48 37-48 67 0 29 21 49 48 49s48-20 48-49c0-30-30-45-48-67Z" fill="url(#g)" opacity=".95"/>
+<text x="110" y="126" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" font-weight="900" fill="#fff4cf">MV</text>
+<text x="110" y="151" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#fff">POINTS</text>
+</svg>
