@@ -34,6 +34,9 @@ Premium MV Points black/red/gold casino-style interface with responsive sizing a
 - Added local dashboard artwork (`dashboard-art.svg`).
 - Made Clear All reset the 7s Point draft safely.
 - Fixed Games page losing your 7s Point player selection when you navigate away mid-draft.
+- Fixed stale Rummy score inputs showing on top of the 7s Point round panel (CSS `hidden` was being overridden).
+- Fixed Round 1 / Round 7 doubling: any entered value is now doubled (previously only exactly "2" was doubled to 4).
+- Winner and Last Point Player now both show their score (e.g. Winner 85 · Last Point 189) on the dashboard and in the game detail view.
 
 ## New features
 - Undo for member/game deletion (a few seconds via the toast, before it's gone for good).
