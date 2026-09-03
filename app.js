@@ -25,6 +25,7 @@ function renderDashboard(){
    const sorted=[...(latest.results||[])].sort((a,b)=>a.rank-b.rank), winner=sorted[0], losers=sorted.slice(1);
    $("#currentResult").innerHTML=`<div class="current-result-head"><div><span class="eyebrow">CURRENT WINNER</span><h3>🏆 ${esc(winner?.name||"—")}</h3><div class="muted">${latest.type} • ${formatDate(latest.date)} • Score ${winner?.score??0}</div></div><div class="winner-badge">🏆 WINNER</div></div>`;
    if(loserBox) loserBox.innerHTML=`<div class="loser-dashboard-head"><div><span class="eyebrow">LATEST GAME</span><h3>Losers</h3></div><span class="loser-count">${losers.length}</span></div>
+   <div class="loser-visual"><img src="loser-art.svg" alt="Losers"></div>
    <div class="loser-grid">${losers.length?losers.map(r=>`<div class="loser-card"><div class="loser-avatar">✕</div><div class="loser-info"><b>${esc(r.name)}</b><span>${latest.type} • Rank #${r.rank}</span></div><strong>${r.score}</strong></div>`).join(""):`<div class="muted">No losers</div>`}</div>`;
  }else{
    $("#currentResult").innerHTML=`<div class="current-empty"><span class="eyebrow">CURRENT RESULT</span><h3>🏆 No game yet</h3><p>Save a game to show the current winner and losers here.</p></div>`;

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" fill="none">
+<rect width="180" height="120" rx="24" fill="#170D12"/>
+<circle cx="90" cy="52" r="31" fill="#32131A" stroke="#6B2732" stroke-width="2"/>
+<path d="M78 40l24 24M102 40L78 64" stroke="#FF8A96" stroke-width="7" stroke-linecap="round"/>
+<path d="M55 96c7-16 20-23 35-23s28 7 35 23" stroke="#8A3341" stroke-width="7" stroke-linecap="round"/>
+<circle cx="90" cy="52" r="45" stroke="#4A222B" stroke-dasharray="5 7"/>
+<text x="90" y="112" text-anchor="middle" fill="#FFADB5" font-family="Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2">LOSERS</text>
+</svg>

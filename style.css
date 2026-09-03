@@ -74,7 +74,7 @@ button{touch-action:manipulation}
 .loser-dashboard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .loser-dashboard-head h3{margin:4px 0 0;font-size:21px;color:#ffadb5}
 .loser-count{min-width:34px;height:34px;padding:0 9px;display:grid;place-items:center;border-radius:10px;background:#3a121b;border:1px solid #6b2732;color:#ff9aa5;font-weight:900}
-.loser-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.loser-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px};.loser-visual{display:flex;justify-content:center;margin:-2px 0 12px}.loser-visual img{width:min(100%,180px);height:auto;display:block;filter:drop-shadow(0 10px 20px #0008)}
 .loser-card{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #38262a;background:#0b0c12;border-radius:13px}
 .loser-avatar{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#32131a;color:#ff8793;font-weight:900}
 .loser-info{min-width:0;flex:1}
