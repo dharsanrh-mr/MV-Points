@@ -52,7 +52,8 @@ function gameCard(g){
 $$(".list").forEach(x=>x.addEventListener("click",e=>{const el=e.target.closest("[data-game]");if(el)showGame(el.dataset.game)}));
 
 function renderGames(){
- $("#playerPicker").innerHTML=state.members.length?state.members.map(m=>`<label class="player-check"><input type="checkbox" value="${m.id}"> ${esc(m.name)}</label>`).join(""):`<div class="empty">No members yet. Add one first.</div>`;
+ const draftIds=currentType==="7s Point"?new Set(state.sevenDraft.players||[]):null;
+ $("#playerPicker").innerHTML=state.members.length?state.members.map(m=>`<label class="player-check"><input type="checkbox" value="${m.id}"${draftIds&&draftIds.has(m.id)?" checked":""}> ${esc(m.name)}</label>`).join(""):`<div class="empty">No members yet. Add one first.</div>`;
  $("#scoreInputs").innerHTML="";
  if(currentType==="7s Point"){renderSevenPanel();}else{renderRummyPanel();}
 }
@@ -101,7 +102,8 @@ $("#addPlayerFromGame").onclick=()=>openMemberModal();
 
 function saveSevenRound(){
  const inputs=$$(".seven-input"), d=state.sevenDraft, round=Math.min(7,Math.max(1,Number(d.round)||1));
- const ids=$$("#playerPicker input:checked").map(x=>x.value);
+ const checkedIds=$$("#playerPicker input:checked").map(x=>x.value);
+ const ids=checkedIds.length?checkedIds:(d.players||[]);
  if(ids.length<2)return toast("Select at least 2 players");
  if(inputs.length!==ids.length||inputs.some(i=>i.value===""))return toast("Enter every player's points");
  d.players=ids;
